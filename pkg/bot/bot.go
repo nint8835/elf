@@ -10,14 +10,16 @@ import (
 	"github.com/rs/zerolog/log"
 	"gorm.io/gorm"
 
+	"github.com/muncomputersciencesociety/elf/pkg/adventofcode"
 	"github.com/muncomputersciencesociety/elf/pkg/config"
 	"github.com/muncomputersciencesociety/elf/pkg/database"
 )
 
 type Bot struct {
-	Session  *discordgo.Session
-	Config   config.Config
-	Database *gorm.DB
+	Session            *discordgo.Session
+	Config             config.Config
+	Database           *gorm.DB
+	AdventOfCodeClient *adventofcode.Client
 }
 
 func (bot *Bot) Start() error {
@@ -59,6 +61,13 @@ func New(config config.Config) (*Bot, error) {
 		return nil, fmt.Errorf("error creating DB instance: %w", err)
 	}
 	bot.Database = db
+
+	log.Debug().Msg("Creating Advent of Code client")
+	client, err := adventofcode.NewClient(config.AdventOfCodeSession)
+	if err != nil {
+		return nil, fmt.Errorf("error creating Advent of Code client: %w", err)
+	}
+	bot.AdventOfCodeClient = client
 
 	return bot, nil
 }

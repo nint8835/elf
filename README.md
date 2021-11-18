@@ -16,5 +16,5 @@ If you are developing (or if the onboarding process still doesn't exist as of yo
 Example:
 
 ```sh
-go run ./cmd/testdata --channel-id 909857762064871444 --guild-id 514110851016556567 --leaderboard-code 1111111-11111111
+go run ./cmd/testdata --channel-id 909857762064871444 --guild-id 514110851016556567 --leaderboard-code 1111111-11111111 --leaderboard-id 0000001
 ```

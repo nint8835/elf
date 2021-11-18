@@ -9,6 +9,8 @@ type Guild struct {
 	GuildID string `gorm:"index"`
 	// LeaderboardCode is the Advent of Code leaderboard code for this guild's leaderboard.
 	LeaderboardCode *string
+	// LeaderboardID is the unique ID for the Advent of Code leaderboard for this guild.
+	LeaderboardID *string
 	// ChannelID is the ID of the channel to post leaderboard updates to.
 	ChannelID *string
 }

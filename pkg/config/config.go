@@ -11,9 +11,15 @@ import (
 )
 
 type Config struct {
+	// LogLevel is the level of logging to use.
 	LogLevel string `default:"info" split_words:"true"`
 
-	DiscordToken        string `required:"true" split_words:"true"`
+	// DatabasePath is the path to a SQLite database file to use for data storage.
+	DatabasePath string `default:"elf.sqlite" split_words:"true"`
+
+	// DiscordToken is the token of the Discord bot to run as.
+	DiscordToken string `required:"true" split_words:"true"`
+	// AdventOfCodeSession is the session cookie for Advent of Code of the bot user to use for this bot instance.
 	AdventOfCodeSession string `required:"true" split_words:"true"`
 }
 

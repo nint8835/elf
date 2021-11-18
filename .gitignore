@@ -16,3 +16,6 @@
 
 # Config
 .env
+
+# Dev DB
+elf.sqlite

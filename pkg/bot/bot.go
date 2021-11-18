@@ -8,13 +8,16 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/rs/zerolog/log"
+	"gorm.io/gorm"
 
 	"github.com/muncomputersciencesociety/elf/pkg/config"
+	"github.com/muncomputersciencesociety/elf/pkg/database"
 )
 
 type Bot struct {
-	Session *discordgo.Session
-	Config  config.Config
+	Session  *discordgo.Session
+	Config   config.Config
+	Database *gorm.DB
 }
 
 func (bot *Bot) Start() error {
@@ -49,6 +52,13 @@ func New(config config.Config) (*Bot, error) {
 	}
 	session.Identify.Intents = discordgo.IntentsAllWithoutPrivileged
 	bot.Session = session
+
+	log.Debug().Msg("Creating DB instance")
+	db, err := database.Connect(config)
+	if err != nil {
+		return nil, fmt.Errorf("error creating DB instance: %w", err)
+	}
+	bot.Database = db
 
 	return bot, nil
 }

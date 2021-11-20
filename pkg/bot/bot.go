@@ -22,6 +22,29 @@ type Bot struct {
 	AdventOfCodeClient *adventofcode.Client
 }
 
+func (bot *Bot) handleCommand(interaction *discordgo.InteractionCreate) {
+	commandName := interaction.ApplicationCommandData().Name
+	handler, ok := commandHandlers[commandName]
+	if !ok {
+		log.Error().Str("command", commandName).Msg("Got interaction event for unknown command")
+		return
+	}
+	err := handler(bot, interaction)
+	if err != nil {
+		log.Error().Str("command", commandName).Err(err).Msg("Error handling command")
+	}
+}
+
+func (bot *Bot) onInteractionCreate(session *discordgo.Session, interaction *discordgo.InteractionCreate) {
+	switch interaction.Type {
+	case discordgo.InteractionApplicationCommand:
+		bot.handleCommand(interaction)
+	default:
+		log.Warn().Interface("interaction", interaction).Msg("Got unknown interaction event")
+	}
+
+}
+
 func (bot *Bot) Start() error {
 	err := bot.Session.Open()
 	if err != nil {
@@ -53,6 +76,7 @@ func New(config config.Config) (*Bot, error) {
 		return nil, fmt.Errorf("error creating Discord session: %w", err)
 	}
 	session.Identify.Intents = discordgo.IntentsAllWithoutPrivileged
+	session.AddHandler(bot.onInteractionCreate)
 	bot.Session = session
 
 	log.Debug().Msg("Creating DB instance")

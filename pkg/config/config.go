@@ -19,6 +19,8 @@ type Config struct {
 
 	// DiscordToken is the token of the Discord bot to run as.
 	DiscordToken string `required:"true" split_words:"true"`
+	// DiscordAppID is the ID of the app owning the bot user.
+	DiscordAppID string `required:"true" split_words:"true"`
 	// AdventOfCodeSession is the session cookie for Advent of Code of the bot user to use for this bot instance.
 	AdventOfCodeSession string `required:"true" split_words:"true"`
 }

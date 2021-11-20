@@ -13,4 +13,6 @@ type Guild struct {
 	LeaderboardID *string
 	// ChannelID is the ID of the channel to post leaderboard updates to.
 	ChannelID *string
+	// MessageID is the ID of the current leaderboard message.
+	MessageID *string
 }

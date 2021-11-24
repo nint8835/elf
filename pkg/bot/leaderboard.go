@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"sort"
+	"strconv"
+	"strings"
 
 	"github.com/bwmarrin/discordgo"
 
@@ -46,10 +48,29 @@ func (bot *Bot) GenerateLeaderboardEmbed(guildId string) (*discordgo.MessageEmbe
 		return leaderboardEntries[i].LocalScore > leaderboardEntries[j].LocalScore
 	})
 
-	for i, member := range leaderboardEntries[:10] {
+	for i, member := range leaderboardEntries[:20] {
+		stars := ""
+
+		for dayNumber := 1; dayNumber <= 25; dayNumber++ {
+			day, ok := member.CompletionDayLevel[strconv.Itoa(dayNumber)]
+			if !ok {
+				stars += "⬛"
+				continue
+			}
+			_, star1 := day["1"]
+			_, star2 := day["2"]
+			if star1 && star2 {
+				stars += "🟨"
+			} else if star1 || star2 {
+				stars += "⬜"
+			}
+		}
+
+		stars = strings.TrimRight(stars, "⬛")
+
 		leaderboardEmbed.Fields = append(leaderboardEmbed.Fields, &discordgo.MessageEmbedField{
 			Name:  fmt.Sprintf("%d. %s", i+1, member.Name),
-			Value: fmt.Sprintf("%d points", member.LocalScore),
+			Value: fmt.Sprintf("%d points\n%s", member.LocalScore, stars),
 		})
 	}
 

@@ -1,9 +1,10 @@
 package bot
 
 import (
-	"fmt"
+	"errors"
 
 	"github.com/bwmarrin/discordgo"
+	"gorm.io/gorm"
 )
 
 const InteractionResponseFlagEphemeral = 1 << 6
@@ -21,16 +22,28 @@ var commandHandlers = map[string]func(*Bot, *discordgo.InteractionCreate) error{
 }
 
 func leaderboardCommand(bot *Bot, interaction *discordgo.InteractionCreate) error {
-	err := bot.Session.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			Content: "This command is not yet implemented",
-			Flags:   InteractionResponseFlagEphemeral,
-		},
-	})
+	leaderboard, err := bot.GenerateLeaderboardEmbed(interaction.GuildID)
 	if err != nil {
-		return fmt.Errorf("error responding to command: %w", err)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return bot.Session.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					Embeds: []*discordgo.MessageEmbed{
+						{
+							Title:       "No leaderboard found",
+							Description: "There is no leaderboard for this guild.",
+							Color:       0xFF0000,
+						},
+					},
+				}})
+		}
+		return err
 	}
 
-	return nil
+	return bot.Session.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Embeds: []*discordgo.MessageEmbed{leaderboard},
+		},
+	})
 }

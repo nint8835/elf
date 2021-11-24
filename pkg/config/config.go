@@ -23,6 +23,9 @@ type Config struct {
 	DiscordAppID string `required:"true" split_words:"true"`
 	// AdventOfCodeSession is the session cookie for Advent of Code of the bot user to use for this bot instance.
 	AdventOfCodeSession string `required:"true" split_words:"true"`
+
+	// AdventOfCodeEvent is the event to fetch details from.
+	AdventOfCodeEvent string `default:"2020" split_words:"true"` // TODO: Set to 2020 for testing. Should be set back to 2021 for the actual event.
 }
 
 func Load() (Config, error) {

@@ -6,6 +6,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
 
@@ -36,6 +37,7 @@ func (bot *Bot) GenerateLeaderboardEmbed(guildId string) (*discordgo.MessageEmbe
 		Footer: &discordgo.MessageEmbedFooter{
 			Text: fmt.Sprintf("Join code: %s", *guild.LeaderboardCode),
 		},
+		Timestamp: time.Now().Format(time.RFC3339),
 	}
 
 	leaderboardEntries := []adventofcode.LeaderboardMember{}

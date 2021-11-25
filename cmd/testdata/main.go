@@ -31,11 +31,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	messageIdFlag := messageIdFlag
-	if *messageIdFlag == "" {
-		messageIdFlag = nil
-	}
-
 	guild := &database.Guild{
 		GuildID:         *guildIdFlag,
 		LeaderboardCode: leaderboardCodeFlag,

@@ -1,0 +1,10 @@
+version: '3'
+
+services:
+  elf:
+    image: ghcr.io/muncomputersciencesociety/elf
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - ./elf.sqlite:/elf/elf.sqlite

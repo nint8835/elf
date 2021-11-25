@@ -68,23 +68,10 @@ func (bot *Bot) updateLeaderboards() {
 			continue
 		}
 
-		if guild.MessageID != nil {
-			_, err = bot.Session.ChannelMessageEditEmbed(*guild.ChannelID, *guild.MessageID, leaderboard)
-			if err != nil {
-				log.Error().Err(err).Str("guild", guild.GuildID).Msg("Error editing leaderboard")
-				continue
-			}
-		} else {
-			message, err := bot.Session.ChannelMessageSendEmbed(*guild.ChannelID, leaderboard)
-			if err != nil {
-				log.Error().Err(err).Str("guild", guild.GuildID).Msg("Error sending leaderboard")
-				continue
-			}
-
-			guild.MessageID = &message.ID
-			if tx := bot.Database.Save(&guild); tx.Error != nil {
-				log.Error().Err(tx.Error).Str("guild", guild.GuildID).Msg("Error saving guild to database")
-			}
+		_, err = bot.Session.ChannelMessageSendEmbed(*guild.ChannelID, leaderboard)
+		if err != nil {
+			log.Error().Err(err).Str("guild", guild.GuildID).Msg("Error sending leaderboard")
+			continue
 		}
 	}
 }
@@ -140,7 +127,7 @@ func New(config config.Config) (*Bot, error) {
 
 	log.Debug().Msg("Creating scheduler")
 	bot.Scheduler = gocron.NewScheduler(time.UTC)
-	bot.Scheduler.Cron("30 15,23 * * *").Do(bot.updateLeaderboards)
+	bot.Scheduler.Cron(config.UpdateSchedule).Do(bot.updateLeaderboards)
 
 	return bot, nil
 }

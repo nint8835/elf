@@ -70,8 +70,13 @@ func (bot *Bot) GenerateLeaderboardEmbed(guildId string) (*discordgo.MessageEmbe
 
 		stars = strings.TrimRight(stars, "⬛")
 
+		username := member.Name
+		if username == "" {
+			username = fmt.Sprintf("(anonymous user #%s)", member.ID)
+		}
+
 		leaderboardEmbed.Fields = append(leaderboardEmbed.Fields, &discordgo.MessageEmbedField{
-			Name:  fmt.Sprintf("%d. %s", i+1, member.Name),
+			Name:  fmt.Sprintf("%d. %s", i+1, username),
 			Value: fmt.Sprintf("%d points\n%s", member.LocalScore, stars),
 		})
 	}

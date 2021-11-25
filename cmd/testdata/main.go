@@ -15,7 +15,6 @@ var guildIdFlag = flag.String("guild-id", "", "Guild ID to add to the database")
 var leaderboardCodeFlag = flag.String("leaderboard-code", "", "Leaderboard code to add to the database")
 var leaderboardIdFlag = flag.String("leaderboard-id", "", "Leaderboard ID to add to the database")
 var channelIdFlag = flag.String("channel-id", "", "Channel ID to add to the database")
-var messageIdFlag = flag.String("message-id", "", "Message ID to add to the database")
 
 func main() {
 	flag.Parse()
@@ -42,7 +41,6 @@ func main() {
 		LeaderboardCode: leaderboardCodeFlag,
 		LeaderboardID:   leaderboardIdFlag,
 		ChannelID:       channelIdFlag,
-		MessageID:       messageIdFlag,
 	}
 
 	tx := bot.Database.Create(guild)

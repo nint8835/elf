@@ -25,7 +25,9 @@ type Config struct {
 	AdventOfCodeSession string `required:"true" split_words:"true"`
 
 	// AdventOfCodeEvent is the event to fetch details from.
-	AdventOfCodeEvent string `default:"2020" split_words:"true"` // TODO: Set to 2020 for testing. Should be set back to 2021 for the actual event.
+	AdventOfCodeEvent string `default:"2021" split_words:"true"`
+	// UpdateSchedule is a cron schedule expression (in UTC) denoting when to update leaderboards
+	UpdateSchedule string `default:"30 1,15 1-25 Dec *" split_words:"true"`
 }
 
 func Load() (Config, error) {

@@ -6,15 +6,46 @@ import (
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
+	"sync"
+	"time"
+
+	"github.com/rs/zerolog/log"
 )
+
+type cacheKey struct {
+	LeaderboardID string
+	Event         string
+}
+
+type cacheEntry struct {
+	Leaderboard Leaderboard
+	RetrievedAt time.Time
+}
 
 // Client is the client for the Advent of Code API.
 type Client struct {
 	client *http.Client
+
+	cache     map[cacheKey]cacheEntry
+	cacheLock *sync.Mutex
 }
 
 // GetLeaderboard returns the leaderboard for a given private leaderboard ID and event.
 func (client *Client) GetLeaderboard(leaderboardId string, event string) (Leaderboard, error) {
+	client.cacheLock.Lock()
+	defer client.cacheLock.Unlock()
+
+	requestCacheKey := cacheKey{
+		LeaderboardID: leaderboardId,
+		Event:         event,
+	}
+
+	cachedVal, hasCachedVal := client.cache[requestCacheKey]
+	if hasCachedVal && time.Since(cachedVal.RetrievedAt) < time.Minute*15 {
+		log.Debug().Msg("Leaderboard requested, but cache not expired. Using cached value.")
+		return cachedVal.Leaderboard, nil
+	}
+
 	resp, err := client.client.Get(fmt.Sprintf("https://adventofcode.com/%s/leaderboard/private/view/%s.json", event, leaderboardId))
 	if err != nil {
 		return Leaderboard{}, fmt.Errorf("error sending request: %w", err)
@@ -25,6 +56,11 @@ func (client *Client) GetLeaderboard(leaderboardId string, event string) (Leader
 	err = json.NewDecoder(resp.Body).Decode(&leaderboard)
 	if err != nil {
 		return Leaderboard{}, fmt.Errorf("error decoding response: %w", err)
+	}
+
+	client.cache[requestCacheKey] = cacheEntry{
+		Leaderboard: leaderboard,
+		RetrievedAt: time.Now(),
 	}
 
 	return leaderboard, nil
@@ -48,6 +84,8 @@ func NewClient(session string) (*Client, error) {
 		},
 	})
 	return &Client{
-		client: &http.Client{Jar: jar},
+		client:    &http.Client{Jar: jar},
+		cache:     map[cacheKey]cacheEntry{},
+		cacheLock: &sync.Mutex{},
 	}, nil
 }

@@ -17,7 +17,7 @@ type cacheKey struct {
 	Event         string
 }
 
-type cacheEntry struct {
+type CachedLeaderboard struct {
 	Leaderboard Leaderboard
 	RetrievedAt time.Time
 }
@@ -26,12 +26,12 @@ type cacheEntry struct {
 type Client struct {
 	client *http.Client
 
-	cache     map[cacheKey]cacheEntry
+	cache     map[cacheKey]CachedLeaderboard
 	cacheLock *sync.Mutex
 }
 
 // GetLeaderboard returns the leaderboard for a given private leaderboard ID and event.
-func (client *Client) GetLeaderboard(leaderboardId string, event string) (Leaderboard, error) {
+func (client *Client) GetLeaderboard(leaderboardId string, event string) (CachedLeaderboard, error) {
 	client.cacheLock.Lock()
 	defer client.cacheLock.Unlock()
 
@@ -40,30 +40,32 @@ func (client *Client) GetLeaderboard(leaderboardId string, event string) (Leader
 		Event:         event,
 	}
 
-	cachedVal, hasCachedVal := client.cache[requestCacheKey]
-	if hasCachedVal && time.Since(cachedVal.RetrievedAt) < time.Minute*15 {
+	cachedLeaderboard, hasCachedVal := client.cache[requestCacheKey]
+	if hasCachedVal && time.Since(cachedLeaderboard.RetrievedAt) < time.Minute*15 {
 		log.Debug().Msg("Leaderboard requested, but cache not expired. Using cached value.")
-		return cachedVal.Leaderboard, nil
+		return cachedLeaderboard, nil
 	}
 
 	resp, err := client.client.Get(fmt.Sprintf("https://adventofcode.com/%s/leaderboard/private/view/%s.json", event, leaderboardId))
 	if err != nil {
-		return Leaderboard{}, fmt.Errorf("error sending request: %w", err)
+		return CachedLeaderboard{}, fmt.Errorf("error sending request: %w", err)
 	}
 	defer resp.Body.Close()
 
 	var leaderboard Leaderboard
 	err = json.NewDecoder(resp.Body).Decode(&leaderboard)
 	if err != nil {
-		return Leaderboard{}, fmt.Errorf("error decoding response: %w", err)
+		return CachedLeaderboard{}, fmt.Errorf("error decoding response: %w", err)
 	}
 
-	client.cache[requestCacheKey] = cacheEntry{
+	cachedLeaderboard = CachedLeaderboard{
 		Leaderboard: leaderboard,
 		RetrievedAt: time.Now(),
 	}
 
-	return leaderboard, nil
+	client.cache[requestCacheKey] = cachedLeaderboard
+
+	return cachedLeaderboard, nil
 }
 
 // NewClient initializes a new client.
@@ -85,7 +87,7 @@ func NewClient(session string) (*Client, error) {
 	})
 	return &Client{
 		client:    &http.Client{Jar: jar},
-		cache:     map[cacheKey]cacheEntry{},
+		cache:     map[cacheKey]CachedLeaderboard{},
 		cacheLock: &sync.Mutex{},
 	}, nil
 }

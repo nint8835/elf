@@ -37,12 +37,12 @@ func (bot *Bot) GenerateLeaderboardEmbed(guildId string) (*discordgo.MessageEmbe
 		Footer: &discordgo.MessageEmbedFooter{
 			Text: fmt.Sprintf("Join code: %s", *guild.LeaderboardCode),
 		},
-		Timestamp: time.Now().Format(time.RFC3339),
+		Timestamp: leaderboard.RetrievedAt.Format(time.RFC3339),
 	}
 
 	leaderboardEntries := []adventofcode.LeaderboardMember{}
 
-	for _, member := range leaderboard.Members {
+	for _, member := range leaderboard.Leaderboard.Members {
 		leaderboardEntries = append(leaderboardEntries, member)
 	}
 

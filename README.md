@@ -2,7 +2,7 @@
 advent of code discord intergration
 
 ## Running
-1. Ensure you have [Go 1.17 or newer](https://golang.org/doc/install) installed
+1. Ensure you have [Go 1.19 or newer](https://golang.org/doc/install) installed
 2. Run `go mod download`
 3. Copy `.env.dist` to `.env` and populate it's contents
    - `ELF_DISCORD_TOKEN`: Discord token for the bot user to run as

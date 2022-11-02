@@ -1,6 +1,6 @@
 module github.com/muncomputersciencesociety/elf
 
-go 1.17
+go 1.19
 
 require (
 	github.com/bwmarrin/discordgo v0.23.3-0.20211117035633-fd6228c0d536

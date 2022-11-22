@@ -13,4 +13,6 @@ type Guild struct {
 	LeaderboardID *string
 	// ChannelID is the ID of the channel to post leaderboard updates to.
 	ChannelID *string
+	// EnableAPI configures whether the data for this leaderboard should be republished via our API.
+	EnableAPI bool
 }

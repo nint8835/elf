@@ -5,6 +5,7 @@ import (
 
 	"github.com/rs/zerolog/log"
 
+	"github.com/muncomputersciencesociety/elf/pkg/api"
 	"github.com/muncomputersciencesociety/elf/pkg/bot"
 	"github.com/muncomputersciencesociety/elf/pkg/config"
 )
@@ -16,15 +17,29 @@ func main() {
 		os.Exit(1)
 	}
 
-	bot, err := bot.New(cfg)
+	botInst, err := bot.New(cfg)
 	if err != nil {
 		log.Error().Err(err).Msg("Error creating bot")
 		os.Exit(1)
 	}
 
-	err = bot.Start()
+	apiInst := api.New(botInst)
+
+	log.Info().Msg("Starting bot")
+	go func() {
+		err := botInst.Start()
+		if err != nil {
+			log.Error().Err(err).Msg("Error starting bot")
+			os.Exit(1)
+		}
+	}()
+
+	log.Info().Msg("Starting API")
+	err = apiInst.Start()
 	if err != nil {
-		log.Error().Err(err).Msg("Error starting bot")
-		os.Exit(1)
+		log.Error().Err(err).Msg("Error starting leaderboard API")
 	}
+
+	log.Info().Msg("Stopping bot")
+	botInst.Stop()
 }

@@ -2,9 +2,6 @@ package bot
 
 import (
 	"fmt"
-	"os"
-	"os/signal"
-	"syscall"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
@@ -23,6 +20,8 @@ type Bot struct {
 	Database           *gorm.DB
 	AdventOfCodeClient *adventofcode.Client
 	Scheduler          *gocron.Scheduler
+
+	quitChan chan struct{}
 }
 
 func (bot *Bot) handleCommand(interaction *discordgo.InteractionCreate) {
@@ -83,11 +82,7 @@ func (bot *Bot) Start() error {
 		return fmt.Errorf("error opening bot session: %w", err)
 	}
 
-	log.Info().Msg("Elf is now running. Press Ctrl-C to exit.")
-	sc := make(chan os.Signal, 1)
-	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
-	<-sc
-	log.Info().Msg("Stopping Elf...")
+	<-bot.quitChan
 
 	err = bot.Session.Close()
 	if err != nil {
@@ -97,9 +92,14 @@ func (bot *Bot) Start() error {
 	return nil
 }
 
+func (bot *Bot) Stop() {
+	bot.quitChan <- struct{}{}
+}
+
 func New(config config.Config) (*Bot, error) {
 	bot := &Bot{
-		Config: config,
+		Config:   config,
+		quitChan: make(chan struct{}, 1),
 	}
 
 	log.Debug().Msg("Creating Discord session")

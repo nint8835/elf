@@ -4,6 +4,8 @@ services:
   elf:
     image: ghcr.io/muncomputersciencesociety/elf
     restart: always
+    environment:
+      GIN_MODE: release
     env_file:
       - .env
     volumes:

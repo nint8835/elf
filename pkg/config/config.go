@@ -28,6 +28,9 @@ type Config struct {
 	AdventOfCodeEvent string `default:"2022" split_words:"true"`
 	// UpdateSchedule is a cron schedule expression (in UTC) denoting when to update leaderboards
 	UpdateSchedule string `default:"30 1,15 1-25 Dec *" split_words:"true"`
+
+	// ApiBindAddr is the address the leaderboard API should listen on.
+	ApiBindAddr string `default:":10000" split_words:"true"`
 }
 
 func Load() (Config, error) {

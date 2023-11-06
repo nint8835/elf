@@ -11,6 +11,7 @@ require (
 	github.com/rs/zerolog v1.31.0
 	gorm.io/driver/sqlite v1.5.4
 	gorm.io/gorm v1.25.5
+	pkg.nit.so/switchboard v0.0.0-20230422000756-d731e4cc9888
 )
 
 require (

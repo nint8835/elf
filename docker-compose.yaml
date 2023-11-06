@@ -2,7 +2,7 @@ version: '3'
 
 services:
   elf:
-    image: ghcr.io/muncomputersciencesociety/elf
+    image: ghcr.io/nint8835/elf
     restart: always
     environment:
       GIN_MODE: release

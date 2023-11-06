@@ -8,11 +8,14 @@ import (
 	"github.com/go-co-op/gocron"
 	"github.com/rs/zerolog/log"
 	"gorm.io/gorm"
+	"pkg.nit.so/switchboard"
 
 	"github.com/nint8835/elf/pkg/adventofcode"
 	"github.com/nint8835/elf/pkg/config"
 	"github.com/nint8835/elf/pkg/database"
 )
+
+var botInst *Bot
 
 type Bot struct {
 	Session            *discordgo.Session
@@ -22,28 +25,6 @@ type Bot struct {
 	Scheduler          *gocron.Scheduler
 
 	quitChan chan struct{}
-}
-
-func (bot *Bot) handleCommand(interaction *discordgo.InteractionCreate) {
-	commandName := interaction.ApplicationCommandData().Name
-	handler, ok := commandHandlers[commandName]
-	if !ok {
-		log.Error().Str("command", commandName).Msg("Got interaction event for unknown command")
-		return
-	}
-	err := handler(bot, interaction)
-	if err != nil {
-		log.Error().Str("command", commandName).Err(err).Msg("Error handling command")
-	}
-}
-
-func (bot *Bot) onInteractionCreate(session *discordgo.Session, interaction *discordgo.InteractionCreate) {
-	switch interaction.Type {
-	case discordgo.InteractionApplicationCommand:
-		bot.handleCommand(interaction)
-	default:
-		log.Warn().Interface("interaction", interaction).Msg("Got unknown interaction event")
-	}
 }
 
 func (bot *Bot) updateLeaderboards() {
@@ -102,14 +83,27 @@ func New(config config.Config) (*Bot, error) {
 		quitChan: make(chan struct{}, 1),
 	}
 
+	parser := switchboard.Switchboard{}
+	_ = parser.AddCommand(&switchboard.Command{
+		Name:        "leaderboard",
+		Description: "Displays the current leaderboard for this guild.",
+		Handler:     leaderboardCommand,
+		GuildID:     config.DiscordGuildID,
+	})
+
 	log.Debug().Msg("Creating Discord session")
 	session, err := discordgo.New("Bot " + config.DiscordToken)
 	if err != nil {
 		return nil, fmt.Errorf("error creating Discord session: %w", err)
 	}
 	session.Identify.Intents = discordgo.IntentsAllWithoutPrivileged
-	session.AddHandler(bot.onInteractionCreate)
+	session.AddHandler(parser.HandleInteractionCreate)
 	bot.Session = session
+
+	err = parser.SyncCommands(session, config.DiscordAppID)
+	if err != nil {
+		return nil, fmt.Errorf("error syncing commands: %w", err)
+	}
 
 	log.Debug().Msg("Creating DB instance")
 	db, err := database.Connect(config)
@@ -128,6 +122,8 @@ func New(config config.Config) (*Bot, error) {
 	log.Debug().Msg("Creating scheduler")
 	bot.Scheduler = gocron.NewScheduler(time.UTC)
 	bot.Scheduler.Cron(config.UpdateSchedule).Do(bot.updateLeaderboards)
+
+	botInst = bot
 
 	return bot, nil
 }

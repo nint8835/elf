@@ -2,31 +2,18 @@
 advent of code discord intergration
 
 ## Running
-1. Ensure you have [Go 1.19 or newer](https://golang.org/doc/install) installed
+1. Ensure you have [Go 1.21 or newer](https://golang.org/doc/install) installed
 2. Run `go mod download`
 3. Copy `.env.dist` to `.env` and populate it's contents
    - `ELF_DISCORD_TOKEN`: Discord token for the bot user to run as
    - `ELF_DISCORD_APP_ID`: ID of the Discord app the bot belongs to
+   - `ELF_DISCORD_GUILD_ID`: ID of the Discord guild to register commands on. Leave blank if you're looking to run a production instance of the bot. If you're working on the bot, provide the ID of the guild you will be testing in
    - `ELF_ADVENT_OF_CODE_SESSION`: Advent of Code session cookie for the bot user
 4. Run `go run ./cmd/elf`
 
-## Registering Commands
-In order to use the bot, you need to register it's slash commands either globally to your app, or to the guild that you will be testing on. You can do this with the `./cmd/registercommands` tool. You can use it like the following:
-
-```sh
-go run ./cmd/registercommands --guild-id 514110851016556567
-```
-
-Or, to register globally:
-
-```sh
-go run ./cmd/registercommands --global
-```
-
-Note that registering commands globally can take up to an hour to fully apply, so for development it is recommended you register at a guild level.
-
 ## Unregistering Commands
-If you need to clean up command registrations (for example, to remove a deleted command or to migrate from guild to global commands), you can re-use the same `./cmd/registercommands` tool. Just add the `--unregister` flag to any invocation of the tool and it will clean up all registered commands in a given scope, rather than registering the new commands for that scope.
+
+If you were using a testing bot, and need to clean up the command registrations, you can use a tool such as [command-clearer](https://github.com/nint8835/command-clearer) to remove existing commands.
 
 ## Manually Registering Guilds
 

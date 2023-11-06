@@ -9,7 +9,7 @@ advent of code discord intergration
    - `ELF_DISCORD_APP_ID`: ID of the Discord app the bot belongs to
    - `ELF_DISCORD_GUILD_ID`: ID of the Discord guild to register commands on. Leave blank if you're looking to run a production instance of the bot. If you're working on the bot, provide the ID of the guild you will be testing in
    - `ELF_ADVENT_OF_CODE_SESSION`: Advent of Code session cookie for the bot user
-4. Run `go run ./cmd/elf`
+4. Run `go run . run`
 
 ## Unregistering Commands
 
@@ -22,5 +22,5 @@ If you are developing (or if the onboarding process still doesn't exist as of yo
 Example:
 
 ```sh
-go run ./cmd/testdata --channel-id 909857762064871444 --guild-id 514110851016556567 --leaderboard-code 1111111-11111111 --leaderboard-id 0000001
+go run . testdata --channel-id 909857762064871444 --guild-id 514110851016556567 --leaderboard-code 1111111-11111111 --leaderboard-id 0000001
 ```

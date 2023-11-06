@@ -6,8 +6,8 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"github.com/muncomputersciencesociety/elf/pkg/bot"
-	"github.com/muncomputersciencesociety/elf/pkg/config"
+	"github.com/nint8835/elf/pkg/bot"
+	"github.com/nint8835/elf/pkg/config"
 )
 
 var guildIdFlag = flag.String("guild-id", "", "Guild ID to register commands on. Should be used for testing.")

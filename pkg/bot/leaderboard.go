@@ -10,8 +10,8 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 
-	"github.com/muncomputersciencesociety/elf/pkg/adventofcode"
-	"github.com/muncomputersciencesociety/elf/pkg/database"
+	"github.com/nint8835/elf/pkg/adventofcode"
+	"github.com/nint8835/elf/pkg/database"
 )
 
 func (bot *Bot) GenerateLeaderboardEmbed(guildId string) (*discordgo.MessageEmbed, error) {

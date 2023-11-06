@@ -6,9 +6,9 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"github.com/muncomputersciencesociety/elf/pkg/bot"
-	"github.com/muncomputersciencesociety/elf/pkg/config"
-	"github.com/muncomputersciencesociety/elf/pkg/database"
+	"github.com/nint8835/elf/pkg/bot"
+	"github.com/nint8835/elf/pkg/config"
+	"github.com/nint8835/elf/pkg/database"
 )
 
 var guildIdFlag = flag.String("guild-id", "", "Guild ID to add to the database")

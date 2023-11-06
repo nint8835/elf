@@ -6,8 +6,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/muncomputersciencesociety/elf/pkg/bot"
-	"github.com/muncomputersciencesociety/elf/pkg/database"
+	"github.com/nint8835/elf/pkg/bot"
+	"github.com/nint8835/elf/pkg/database"
 )
 
 type API struct {

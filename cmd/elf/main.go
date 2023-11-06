@@ -5,9 +5,9 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"github.com/muncomputersciencesociety/elf/pkg/api"
-	"github.com/muncomputersciencesociety/elf/pkg/bot"
-	"github.com/muncomputersciencesociety/elf/pkg/config"
+	"github.com/nint8835/elf/pkg/api"
+	"github.com/nint8835/elf/pkg/bot"
+	"github.com/nint8835/elf/pkg/config"
 )
 
 func main() {

@@ -1,4 +1,4 @@
-module github.com/muncomputersciencesociety/elf
+module github.com/nint8835/elf
 
 go 1.19
 

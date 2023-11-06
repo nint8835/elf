@@ -17,5 +17,5 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
           registry: ghcr.io
-          repository: muncomputersciencesociety/elf
+          repository: nint8835/elf
           tags: latest

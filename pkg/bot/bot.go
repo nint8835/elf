@@ -9,9 +9,9 @@ import (
 	"github.com/rs/zerolog/log"
 	"gorm.io/gorm"
 
-	"github.com/muncomputersciencesociety/elf/pkg/adventofcode"
-	"github.com/muncomputersciencesociety/elf/pkg/config"
-	"github.com/muncomputersciencesociety/elf/pkg/database"
+	"github.com/nint8835/elf/pkg/adventofcode"
+	"github.com/nint8835/elf/pkg/config"
+	"github.com/nint8835/elf/pkg/database"
 )
 
 type Bot struct {

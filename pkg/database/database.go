@@ -6,7 +6,7 @@ import (
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 
-	"github.com/muncomputersciencesociety/elf/pkg/config"
+	"github.com/nint8835/elf/pkg/config"
 )
 
 func Connect(config config.Config) (*gorm.DB, error) {

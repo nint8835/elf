@@ -3,6 +3,7 @@ package bot
 import (
 	"errors"
 	"fmt"
+	"math"
 	"sort"
 	"strconv"
 	"strings"
@@ -50,7 +51,7 @@ func (bot *Bot) GenerateLeaderboardEmbed(guildId string) (*discordgo.MessageEmbe
 		return leaderboardEntries[i].LocalScore > leaderboardEntries[j].LocalScore
 	})
 
-	for i, member := range leaderboardEntries[:20] {
+	for i, member := range leaderboardEntries[:int(math.Min(float64(len(leaderboardEntries)), 20))] {
 		stars := ""
 
 		for dayNumber := 1; dayNumber <= 25; dayNumber++ {

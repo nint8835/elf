@@ -9,4 +9,4 @@ services:
     env_file:
       - .env
     volumes:
-      - ./elf.sqlite:/elf/elf.sqlite
+      - "./data:/data"

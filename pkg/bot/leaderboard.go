@@ -52,7 +52,7 @@ func (bot *Bot) GenerateLeaderboardEmbed(guildId string) (*discordgo.MessageEmbe
 	})
 
 	for i, member := range leaderboardEntries[:int(math.Min(float64(len(leaderboardEntries)), 20))] {
-		stars := ""
+		stars := "`"
 
 		for dayNumber := 1; dayNumber <= 25; dayNumber++ {
 			day, ok := member.CompletionDayLevel[strconv.Itoa(dayNumber)]
@@ -69,7 +69,9 @@ func (bot *Bot) GenerateLeaderboardEmbed(guildId string) (*discordgo.MessageEmbe
 			}
 		}
 
-		stars = strings.TrimRight(stars, "⬛")
+		stars = strings.TrimRight(stars, " ")
+
+		stars += "`"
 
 		username := member.Name
 		if username == "" {

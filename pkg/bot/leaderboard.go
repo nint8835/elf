@@ -51,6 +51,10 @@ func (bot *Bot) GenerateLeaderboardEmbed(guildId string) (*discordgo.MessageEmbe
 		return leaderboardEntries[i].LocalScore > leaderboardEntries[j].LocalScore
 	})
 
+	usernames := ""
+	points := ""
+	stars_m := ""
+
 	for i, member := range leaderboardEntries[:int(math.Min(float64(len(leaderboardEntries)), 20))] {
 		stars := "`"
 
@@ -66,6 +70,8 @@ func (bot *Bot) GenerateLeaderboardEmbed(guildId string) (*discordgo.MessageEmbe
 				stars += "★"
 			} else if star1 || star2 {
 				stars += "☆"
+			} else {
+				stars += "▪"
 			}
 		}
 
@@ -74,15 +80,36 @@ func (bot *Bot) GenerateLeaderboardEmbed(guildId string) (*discordgo.MessageEmbe
 		stars += "`"
 
 		username := member.Name
+		
 		if username == "" {
 			username = fmt.Sprintf("(anonymous user #%s)", member.ID)
 		}
 
-		leaderboardEmbed.Fields = append(leaderboardEmbed.Fields, &discordgo.MessageEmbedField{
-			Name:  fmt.Sprintf("%d. %s", i+1, username),
-			Value: fmt.Sprintf("%d points\n%s", member.LocalScore, stars),
-		})
+		usernames += fmt.Sprintf("`%d` %s\n", i+1, username)
+		points += fmt.Sprintf("`%d`\n", member.LocalScore)
+		stars_m += stars + "\n"
+
+		// leaderboardEmbed.Fields = append(leaderboardEmbed.Fields, &discordgo.MessageEmbedField{
+		// 	Name:  fmt.Sprintf("%d. %s", i+1, username),
+		// 	Value: fmt.Sprintf("%d points\n%s", member.LocalScore, stars),
+		// })
 	}
+
+	leaderboardEmbed.Fields = append(leaderboardEmbed.Fields, &discordgo.MessageEmbedField{
+		Name:  "Top 20",
+		Value: usernames,
+		Inline: true,
+	})
+	leaderboardEmbed.Fields = append(leaderboardEmbed.Fields, &discordgo.MessageEmbedField{
+		Name:  "Points",
+		Value: points,
+		Inline: true,
+	})
+	leaderboardEmbed.Fields = append(leaderboardEmbed.Fields, &discordgo.MessageEmbedField{
+		Name:  "Stars",
+		Value: stars_m,
+		Inline: true,
+	})
 
 	return leaderboardEmbed, nil
 }

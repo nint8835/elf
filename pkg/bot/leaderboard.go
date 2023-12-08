@@ -53,7 +53,7 @@ func (bot *Bot) GenerateLeaderboardEmbed(guildId string) (*discordgo.MessageEmbe
 
 	usernames := ""
 	points := ""
-	stars_m := ""
+	all_stars := ""
 
 	for i, member := range leaderboardEntries[:int(math.Min(float64(len(leaderboardEntries)), 20))] {
 		stars := "`"
@@ -87,7 +87,7 @@ func (bot *Bot) GenerateLeaderboardEmbed(guildId string) (*discordgo.MessageEmbe
 
 		usernames += fmt.Sprintf("`%d` %s\n", i+1, username)
 		points += fmt.Sprintf("`%d`\n", member.LocalScore)
-		stars_m += stars + "\n"
+		all_stars += stars + "\n"
 	}
 
 	leaderboardEmbed.Fields = append(leaderboardEmbed.Fields, &discordgo.MessageEmbedField{
@@ -102,7 +102,7 @@ func (bot *Bot) GenerateLeaderboardEmbed(guildId string) (*discordgo.MessageEmbe
 	})
 	leaderboardEmbed.Fields = append(leaderboardEmbed.Fields, &discordgo.MessageEmbedField{
 		Name:  "Stars",
-		Value: stars_m,
+		Value: all_stars,
 		Inline: true,
 	})
 

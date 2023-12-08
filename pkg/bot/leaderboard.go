@@ -1,6 +1,9 @@
 package bot
 
 import (
+	"bytes"
+	"context"
+	_ "embed"
 	"errors"
 	"fmt"
 	"math"
@@ -10,10 +13,96 @@ import (
 	"time"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/kanrichan/resvg-go"
 
 	"github.com/nint8835/elf/pkg/adventofcode"
 	"github.com/nint8835/elf/pkg/database"
 )
+
+//go:embed Inter.ttf
+var interFontData []byte
+
+func (bot *Bot) GenerateLeaderboardImage(guildId string) (*discordgo.File, error) {
+	var guild database.Guild
+	if tx := bot.Database.First(&guild, "guild_id = ?", guildId); tx.Error != nil {
+		return nil, fmt.Errorf("error fetching guild details: %w", tx.Error)
+	}
+
+	if guild.LeaderboardID == nil {
+		return nil, errors.New("no leaderboard id set")
+	}
+
+	worker, err := resvg.NewDefaultWorker(context.Background())
+	if err != nil {
+		return nil, fmt.Errorf("error creating resvg worker: %w", err)
+	}
+	defer worker.Close()
+
+	fontdb, err := worker.NewFontDBDefault()
+	if err != nil {
+		return nil, fmt.Errorf("error creating fontdb: %w", err)
+	}
+	defer fontdb.Close()
+
+	err = fontdb.LoadFontData(interFontData)
+	if err != nil {
+		return nil, fmt.Errorf("error loading font data: %w", err)
+	}
+
+	err = fontdb.SetSansSerifFamily("Inter")
+	if err != nil {
+		return nil, fmt.Errorf("error setting sans-serif font family: %w", err)
+	}
+
+	err = fontdb.SetSerifFamily("Inter")
+	if err != nil {
+		return nil, fmt.Errorf("error setting serif font family: %w", err)
+	}
+
+	tree, err := worker.NewTreeFromData([]byte(`<svg version="1.1"
+     width="300" height="200"
+     xmlns="http://www.w3.org/2000/svg">
+
+  <rect width="100%" height="100%" fill="red" />
+
+  <circle cx="150" cy="100" r="80" fill="green" />
+
+  <text x="150" y="125" font-size="60" text-anchor="middle" fill="white">SVG</text>
+
+</svg>
+`), &resvg.Options{})
+	if err != nil {
+		return nil, fmt.Errorf("error creating tree: %w", err)
+	}
+	defer tree.Close()
+
+	tree.ConvertText(fontdb)
+
+	treeWidth, treeHeight, err := tree.GetSize()
+	if err != nil {
+		return nil, fmt.Errorf("error getting tree size: %w", err)
+	}
+
+	pixmap, err := worker.NewPixmap(uint32(treeWidth), uint32(treeHeight))
+	if err != nil {
+		return nil, fmt.Errorf("error creating pixmap: %w", err)
+	}
+
+	err = tree.Render(resvg.TransformIdentity(), pixmap)
+	if err != nil {
+		return nil, fmt.Errorf("error rendering leaderboard: %w", err)
+	}
+
+	png, err := pixmap.EncodePNG()
+	if err != nil {
+		return nil, fmt.Errorf("error encoding PNG: %w", err)
+	}
+
+	return &discordgo.File{
+		Name:   "leaderboard.png",
+		Reader: bytes.NewReader(png),
+	}, nil
+}
 
 func (bot *Bot) GenerateLeaderboardEmbed(guildId string) (*discordgo.MessageEmbed, error) {
 	var guild database.Guild

@@ -57,15 +57,15 @@ func (bot *Bot) GenerateLeaderboardEmbed(guildId string) (*discordgo.MessageEmbe
 		for dayNumber := 1; dayNumber <= 25; dayNumber++ {
 			day, ok := member.CompletionDayLevel[strconv.Itoa(dayNumber)]
 			if !ok {
-				stars += "⬛"
+				stars += " "
 				continue
 			}
 			_, star1 := day["1"]
 			_, star2 := day["2"]
 			if star1 && star2 {
-				stars += "🟨"
+				stars += "★"
 			} else if star1 || star2 {
-				stars += "⬜"
+				stars += "☆"
 			}
 		}
 

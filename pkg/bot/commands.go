@@ -21,7 +21,9 @@ func leaderboardCommand(session *discordgo.Session, interaction *discordgo.Inter
 							Color:       0xFF0000,
 						},
 					},
-				}})
+					Flags: discordgo.MessageFlagsEphemeral,
+				},
+			})
 		}
 		return err
 	}
@@ -30,6 +32,7 @@ func leaderboardCommand(session *discordgo.Session, interaction *discordgo.Inter
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
 			Embeds: []*discordgo.MessageEmbed{leaderboard},
+			Flags:  discordgo.MessageFlagsEphemeral,
 		},
 	})
 }

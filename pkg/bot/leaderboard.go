@@ -88,11 +88,6 @@ func (bot *Bot) GenerateLeaderboardEmbed(guildId string) (*discordgo.MessageEmbe
 		usernames += fmt.Sprintf("`%d` %s\n", i+1, username)
 		points += fmt.Sprintf("`%d`\n", member.LocalScore)
 		stars_m += stars + "\n"
-
-		// leaderboardEmbed.Fields = append(leaderboardEmbed.Fields, &discordgo.MessageEmbedField{
-		// 	Name:  fmt.Sprintf("%d. %s", i+1, username),
-		// 	Value: fmt.Sprintf("%d points\n%s", member.LocalScore, stars),
-		// })
 	}
 
 	leaderboardEmbed.Fields = append(leaderboardEmbed.Fields, &discordgo.MessageEmbedField{

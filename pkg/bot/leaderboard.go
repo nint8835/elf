@@ -9,9 +9,10 @@ import (
 	"math"
 	"sort"
 	"strconv"
-	"strings"
+	"text/template"
 	"time"
 
+	"github.com/Masterminds/sprig/v3"
 	"github.com/bwmarrin/discordgo"
 	"github.com/kanrichan/resvg-go"
 
@@ -19,19 +20,75 @@ import (
 	"github.com/nint8835/elf/pkg/database"
 )
 
-//go:embed Inter.ttf
-var interFontData []byte
+//go:embed JetBrainsMono.ttf
+var jetBrainsMonoFontData []byte
 
-func (bot *Bot) GenerateLeaderboardImage(guildId string) (*discordgo.File, error) {
-	var guild database.Guild
-	if tx := bot.Database.First(&guild, "guild_id = ?", guildId); tx.Error != nil {
-		return nil, fmt.Errorf("error fetching guild details: %w", tx.Error)
+//go:embed leaderboard.svg
+var leaderboardTemplateSvg string
+
+var leaderboardTemplate = template.Must(template.New("leaderboard").Funcs(sprig.FuncMap()).Parse(leaderboardTemplateSvg))
+
+type LeaderboardEntry struct {
+	Username string
+	Days     []string
+}
+
+type LeaderboardTemplateData struct {
+	Entries []LeaderboardEntry
+	Event   string
+}
+
+func templateLeaderboardSvg(leaderboard adventofcode.CachedLeaderboard) ([]byte, error) {
+	data := LeaderboardTemplateData{
+		Event: leaderboard.Leaderboard.Event,
 	}
 
-	if guild.LeaderboardID == nil {
-		return nil, errors.New("no leaderboard id set")
+	leaderboardEntries := make([]adventofcode.LeaderboardMember, 0)
+
+	for _, member := range leaderboard.Leaderboard.Members {
+		leaderboardEntries = append(leaderboardEntries, member)
 	}
 
+	sort.Slice(leaderboardEntries, func(i, j int) bool {
+		return leaderboardEntries[i].LocalScore > leaderboardEntries[j].LocalScore
+	})
+
+	for _, member := range leaderboardEntries[:int(math.Min(float64(len(leaderboard.Leaderboard.Members)), 10))] {
+		var days []string
+
+		for dayNumber := 1; dayNumber <= 25; dayNumber++ {
+			day, ok := member.CompletionDayLevel[strconv.Itoa(dayNumber)]
+			if !ok {
+				days = append(days, "rgba(0,0,0,0)")
+				continue
+			}
+			_, star1 := day["1"]
+			_, star2 := day["2"]
+			if star1 && star2 {
+				days = append(days, "rgb(241,150,0)")
+			} else if star1 || star2 {
+				days = append(days, "rgb(150,150,150)")
+			} else {
+				days = append(days, "rgba(0,0,0,0)")
+			}
+		}
+
+		data.Entries = append(data.Entries, LeaderboardEntry{
+			Username: member.Name,
+			Days:     days,
+		})
+	}
+
+	var buffer bytes.Buffer
+	err := leaderboardTemplate.Execute(&buffer, data)
+	if err != nil {
+		return nil, fmt.Errorf("error executing leaderboard template: %w", err)
+	}
+
+	return buffer.Bytes(), nil
+}
+
+func renderSvg(content []byte) ([]byte, error) {
 	worker, err := resvg.NewDefaultWorker(context.Background())
 	if err != nil {
 		return nil, fmt.Errorf("error creating resvg worker: %w", err)
@@ -44,14 +101,14 @@ func (bot *Bot) GenerateLeaderboardImage(guildId string) (*discordgo.File, error
 	}
 	defer fontdb.Close()
 
-	err = fontdb.LoadFontData(interFontData)
+	err = fontdb.LoadFontData(jetBrainsMonoFontData)
 	if err != nil {
 		return nil, fmt.Errorf("error loading font data: %w", err)
 	}
 
-	err = fontdb.SetSansSerifFamily("Inter")
+	err = fontdb.SetMonospaceFamily("JetBrains Mono")
 	if err != nil {
-		return nil, fmt.Errorf("error setting sans-serif font family: %w", err)
+		return nil, fmt.Errorf("error setting monospace font family: %w", err)
 	}
 
 	err = fontdb.SetSerifFamily("Inter")
@@ -59,18 +116,7 @@ func (bot *Bot) GenerateLeaderboardImage(guildId string) (*discordgo.File, error
 		return nil, fmt.Errorf("error setting serif font family: %w", err)
 	}
 
-	tree, err := worker.NewTreeFromData([]byte(`<svg version="1.1"
-     width="300" height="200"
-     xmlns="http://www.w3.org/2000/svg">
-
-  <rect width="100%" height="100%" fill="red" />
-
-  <circle cx="150" cy="100" r="80" fill="green" />
-
-  <text x="150" y="125" font-size="60" text-anchor="middle" fill="white">SVG</text>
-
-</svg>
-`), &resvg.Options{})
+	tree, err := worker.NewTreeFromData(content, &resvg.Options{})
 	if err != nil {
 		return nil, fmt.Errorf("error creating tree: %w", err)
 	}
@@ -98,13 +144,10 @@ func (bot *Bot) GenerateLeaderboardImage(guildId string) (*discordgo.File, error
 		return nil, fmt.Errorf("error encoding PNG: %w", err)
 	}
 
-	return &discordgo.File{
-		Name:   "leaderboard.png",
-		Reader: bytes.NewReader(png),
-	}, nil
+	return png, nil
 }
 
-func (bot *Bot) GenerateLeaderboardEmbed(guildId string) (*discordgo.MessageEmbed, error) {
+func (bot *Bot) GenerateLeaderboardMessage(guildId string) (*discordgo.InteractionResponseData, error) {
 	var guild database.Guild
 	if tx := bot.Database.First(&guild, "guild_id = ?", guildId); tx.Error != nil {
 		return nil, fmt.Errorf("error fetching guild details: %w", tx.Error)
@@ -119,59 +162,36 @@ func (bot *Bot) GenerateLeaderboardEmbed(guildId string) (*discordgo.MessageEmbe
 		return nil, fmt.Errorf("error fetching leaderboard: %w", err)
 	}
 
-	leaderboardEmbed := &discordgo.MessageEmbed{
-		Title:  "Leaderboard",
-		URL:    fmt.Sprintf("https://adventofcode.com/%s/leaderboard/private/view/%s", bot.Config.AdventOfCodeEvent, *guild.LeaderboardID),
-		Color:  0x007152,
-		Fields: []*discordgo.MessageEmbedField{},
-		Footer: &discordgo.MessageEmbedFooter{
-			Text: fmt.Sprintf("Join code: %s", *guild.LeaderboardCode),
+	templatedLeaderboard, err := templateLeaderboardSvg(leaderboard)
+	if err != nil {
+		return nil, fmt.Errorf("error templating leaderboard: %w", err)
+	}
+
+	png, err := renderSvg(templatedLeaderboard)
+	if err != nil {
+		return nil, fmt.Errorf("error rendering leaderboard: %w", err)
+	}
+
+	return &discordgo.InteractionResponseData{
+		Embeds: []*discordgo.MessageEmbed{
+			{
+				Title: "Leaderboard",
+				URL:   fmt.Sprintf("https://adventofcode.com/%s/leaderboard/private/view/%s", bot.Config.AdventOfCodeEvent, *guild.LeaderboardID),
+				Color: 0x007152,
+				Image: &discordgo.MessageEmbedImage{
+					URL: "attachment://leaderboard.png",
+				},
+				Footer: &discordgo.MessageEmbedFooter{
+					Text: fmt.Sprintf("Join code: %s", *guild.LeaderboardCode),
+				},
+				Timestamp: leaderboard.RetrievedAt.Format(time.RFC3339),
+			},
 		},
-		Timestamp: leaderboard.RetrievedAt.Format(time.RFC3339),
-	}
-
-	leaderboardEntries := []adventofcode.LeaderboardMember{}
-
-	for _, member := range leaderboard.Leaderboard.Members {
-		leaderboardEntries = append(leaderboardEntries, member)
-	}
-
-	sort.Slice(leaderboardEntries, func(i, j int) bool {
-		return leaderboardEntries[i].LocalScore > leaderboardEntries[j].LocalScore
-	})
-
-	for i, member := range leaderboardEntries[:int(math.Min(float64(len(leaderboardEntries)), 20))] {
-		stars := "`"
-
-		for dayNumber := 1; dayNumber <= 25; dayNumber++ {
-			day, ok := member.CompletionDayLevel[strconv.Itoa(dayNumber)]
-			if !ok {
-				stars += " "
-				continue
-			}
-			_, star1 := day["1"]
-			_, star2 := day["2"]
-			if star1 && star2 {
-				stars += "★"
-			} else if star1 || star2 {
-				stars += "☆"
-			}
-		}
-
-		stars = strings.TrimRight(stars, " ")
-
-		stars += "`"
-
-		username := member.Name
-		if username == "" {
-			username = fmt.Sprintf("(anonymous user #%s)", member.ID)
-		}
-
-		leaderboardEmbed.Fields = append(leaderboardEmbed.Fields, &discordgo.MessageEmbedField{
-			Name:  fmt.Sprintf("%d. %s", i+1, username),
-			Value: fmt.Sprintf("%d points\n%s", member.LocalScore, stars),
-		})
-	}
-
-	return leaderboardEmbed, nil
+		Files: []*discordgo.File{
+			{
+				Name:   "leaderboard.png",
+				Reader: bytes.NewReader(png),
+			},
+		},
+	}, nil
 }

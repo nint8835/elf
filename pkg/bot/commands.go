@@ -9,7 +9,7 @@ import (
 )
 
 func leaderboardCommand(session *discordgo.Session, interaction *discordgo.InteractionCreate, _ struct{}) error {
-	leaderboard, err := botInst.GenerateLeaderboardImage(interaction.GuildID)
+	interactionData, err := botInst.GenerateLeaderboardMessage(interaction.GuildID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return session.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
@@ -30,11 +30,10 @@ func leaderboardCommand(session *discordgo.Session, interaction *discordgo.Inter
 		return err
 	}
 
+	interactionData.Flags = discordgo.MessageFlagsEphemeral
+
 	return session.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			Files: []*discordgo.File{leaderboard},
-			Flags: discordgo.MessageFlagsEphemeral,
-		},
+		Data: interactionData,
 	})
 }

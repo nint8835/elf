@@ -20,6 +20,10 @@ import (
 	"github.com/nint8835/elf/pkg/database"
 )
 
+var noStarsStyle = "stroke:rgb(100,100,100);stroke-width:1;fill:none;"
+var oneStarStyle = "fill:rgb(150,150,150);"
+var twoStarsStyle = "fill:rgb(241,150,0);"
+
 //go:embed JetBrainsMono.ttf
 var jetBrainsMonoFontData []byte
 
@@ -39,6 +43,8 @@ type LeaderboardTemplateData struct {
 }
 
 func templateLeaderboardSvg(leaderboard adventofcode.CachedLeaderboard) ([]byte, error) {
+	currentDay := time.Now().UTC().Day()
+
 	data := LeaderboardTemplateData{
 		Event: leaderboard.Leaderboard.Event,
 	}
@@ -56,20 +62,20 @@ func templateLeaderboardSvg(leaderboard adventofcode.CachedLeaderboard) ([]byte,
 	for _, member := range leaderboardEntries[:int(math.Min(float64(len(leaderboard.Leaderboard.Members)), 10))] {
 		var days []string
 
-		for dayNumber := 1; dayNumber <= 25; dayNumber++ {
+		for dayNumber := 1; dayNumber <= currentDay; dayNumber++ {
 			day, ok := member.CompletionDayLevel[strconv.Itoa(dayNumber)]
 			if !ok {
-				days = append(days, "rgba(0,0,0,0)")
+				days = append(days, noStarsStyle)
 				continue
 			}
 			_, star1 := day["1"]
 			_, star2 := day["2"]
 			if star1 && star2 {
-				days = append(days, "rgb(241,150,0)")
+				days = append(days, twoStarsStyle)
 			} else if star1 || star2 {
-				days = append(days, "rgb(150,150,150)")
+				days = append(days, oneStarStyle)
 			} else {
-				days = append(days, "rgba(0,0,0,0)")
+				days = append(days, noStarsStyle)
 			}
 		}
 

@@ -4,11 +4,12 @@ import (
 	"errors"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/rs/zerolog/log"
 	"gorm.io/gorm"
 )
 
 func leaderboardCommand(session *discordgo.Session, interaction *discordgo.InteractionCreate, _ struct{}) error {
-	leaderboard, err := botInst.GenerateLeaderboardEmbed(interaction.GuildID)
+	interactionData, err := botInst.GenerateLeaderboardMessage(interaction.GuildID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return session.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
@@ -25,14 +26,14 @@ func leaderboardCommand(session *discordgo.Session, interaction *discordgo.Inter
 				},
 			})
 		}
+		log.Error().Err(err).Msg("Error generating leaderboard")
 		return err
 	}
 
+	interactionData.Flags = discordgo.MessageFlagsEphemeral
+
 	return session.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			Embeds: []*discordgo.MessageEmbed{leaderboard},
-			Flags:  discordgo.MessageFlagsEphemeral,
-		},
+		Data: interactionData,
 	})
 }

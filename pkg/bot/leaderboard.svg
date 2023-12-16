@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 750 1000" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <g id="Background" transform="matrix(1.00147,0,0,1.05409,-0.611635,-54.091)">
+        <rect x="0.611" y="51.315" width="748.901" height="948.685" style="fill:rgb(19,26,32);"/>
+    </g>
+    <g transform="matrix(1.25534,0,0,1.25534,-51.849,-73.381)">
+        <text x="91.957px" y="111.929px" style="font-family:'JetBrains Mono', monospace;font-weight:700;font-size:43.865px;fill:rgb(255,165,21);">Advent of Code {{ .Event }}</text>
+    </g>
+    {{ range $userIndex, $user := .Entries }}
+        <g id="User-1" serif:id="User 1" transform="matrix(1,0,0,1,0,{{ mul $userIndex 90 }})">
+            <g transform="matrix(1,0,0,1,-5.78812,-17.4767)">
+                <text x="36.905px" y="136.406px" style="font-family:'JetBrains Mono', monospace;font-weight:700;font-size:20.833px;fill:rgb(178,178,178);">{{ add $userIndex 1 }}. {{ $user.Username }}</text>
+            </g>
+            <g id="Stars" transform="matrix(1.244,0,0,1.27835,26.8986,-38.5304)">
+                {{ range $dayIndex, $day := $user.Days}}
+                    <g transform="matrix(1,0,0,1,{{mul $dayIndex 20}},0)">
+                        <path d="M37.5,130L39.184,135.182L44.633,135.182L40.225,138.385L41.908,143.568L37.5,140.365L33.092,143.568L34.775,138.385L30.367,135.182L35.816,135.182L37.5,130Z" style="{{ $day }}"/>
+                    </g>
+                {{ end }}
+            </g>
+        </g>
+    {{ end }}
+</svg>

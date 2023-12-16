@@ -42,13 +42,16 @@ func (bot *Bot) updateLeaderboards() {
 			continue
 		}
 
-		leaderboard, err := bot.GenerateLeaderboardEmbed(guild.GuildID)
+		respData, err := bot.GenerateLeaderboardMessage(guild.GuildID)
 		if err != nil {
 			log.Error().Err(err).Str("guild", guild.GuildID).Msg("Error generating leaderboard")
 			continue
 		}
 
-		_, err = bot.Session.ChannelMessageSendEmbed(*guild.ChannelID, leaderboard)
+		_, err = bot.Session.ChannelMessageSendComplex(*guild.ChannelID, &discordgo.MessageSend{
+			Embeds: respData.Embeds,
+			Files:  respData.Files,
+		})
 		if err != nil {
 			log.Error().Err(err).Str("guild", guild.GuildID).Msg("Error sending leaderboard")
 			continue

@@ -79,8 +79,13 @@ func templateLeaderboardSvg(leaderboard adventofcode.CachedLeaderboard) ([]byte,
 			}
 		}
 
+		username := member.Name
+		if username == "" {
+			username = fmt.Sprintf("(anonymous user #%s)", member.ID)
+		}
+
 		data.Entries = append(data.Entries, LeaderboardEntry{
-			Username: member.Name,
+			Username: username,
 			Days:     days,
 		})
 	}

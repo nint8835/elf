@@ -43,7 +43,12 @@ type LeaderboardTemplateData struct {
 }
 
 func templateLeaderboardSvg(leaderboard adventofcode.CachedLeaderboard) ([]byte, error) {
-	currentDay := time.Now().UTC().Day()
+	location, err := time.LoadLocation("America/New_York")
+	if err != nil {
+		return nil, fmt.Errorf("error loading timezone: %w", err)
+	}
+
+	currentDay := time.Now().In(location).Day()
 
 	data := LeaderboardTemplateData{
 		Event: leaderboard.Leaderboard.Event,
@@ -91,7 +96,7 @@ func templateLeaderboardSvg(leaderboard adventofcode.CachedLeaderboard) ([]byte,
 	}
 
 	var buffer bytes.Buffer
-	err := leaderboardTemplate.Execute(&buffer, data)
+	err = leaderboardTemplate.Execute(&buffer, data)
 	if err != nil {
 		return nil, fmt.Errorf("error executing leaderboard template: %w", err)
 	}

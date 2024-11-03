@@ -1,5 +1,5 @@
 {
     "gopls": {
-        "formatting.local": "github.com/muncomputersciencesociety/elf"
+        "formatting.local": "github.com/nint8835/elf"
     }
 }

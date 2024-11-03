@@ -1,6 +1,6 @@
 module github.com/nint8835/elf
 
-go 1.21.0
+go 1.23.2
 
 require (
 	github.com/Masterminds/sprig/v3 v3.2.3

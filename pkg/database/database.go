@@ -3,7 +3,7 @@ package database
 import (
 	"fmt"
 
-	"gorm.io/driver/sqlite"
+	"github.com/glebarez/sqlite"
 	"gorm.io/gorm"
 
 	"github.com/nint8835/elf/pkg/config"

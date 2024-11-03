@@ -4,8 +4,6 @@ services:
   elf:
     image: ghcr.io/nint8835/elf
     restart: always
-    environment:
-      GIN_MODE: release
     env_file:
       - .env
     volumes:

@@ -26,6 +26,7 @@ var testdataCmd = &cobra.Command{
 		var channelId string
 		var leaderboardId string
 		var leaderboardCode string
+		var enableAPI bool
 
 		err = huh.NewForm(
 			huh.NewGroup(
@@ -43,6 +44,9 @@ var testdataCmd = &cobra.Command{
 				huh.NewInput().
 					Title("Leaderboard Code").
 					Value(&leaderboardCode),
+				huh.NewConfirm().
+					Title("Enable API").
+					Value(&enableAPI),
 			).Title("Advent of Code"),
 		).WithTheme(huh.ThemeCatppuccin()).Run()
 		checkError(err, "Error getting test data")
@@ -52,6 +56,7 @@ var testdataCmd = &cobra.Command{
 			LeaderboardCode: &leaderboardCode,
 			LeaderboardID:   &leaderboardId,
 			ChannelID:       &channelId,
+			EnableAPI:       enableAPI,
 		}
 
 		tx := bot.Database.Create(guild)

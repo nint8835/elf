@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/charmbracelet/huh"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 
@@ -21,10 +22,30 @@ var testdataCmd = &cobra.Command{
 		bot, err := bot.New(cfg)
 		checkError(err, "Error creating bot")
 
-		guildId, _ := cmd.Flags().GetString("guild-id")
-		leaderboardCode, _ := cmd.Flags().GetString("leaderboard-code")
-		leaderboardId, _ := cmd.Flags().GetString("leaderboard-id")
-		channelId, _ := cmd.Flags().GetString("channel-id")
+		var guildId string
+		var channelId string
+		var leaderboardId string
+		var leaderboardCode string
+
+		err = huh.NewForm(
+			huh.NewGroup(
+				huh.NewInput().
+					Title("Guild ID").
+					Value(&guildId),
+				huh.NewInput().
+					Title("Channel ID").
+					Value(&channelId),
+			).Title("Discord"),
+			huh.NewGroup(
+				huh.NewInput().
+					Title("Leaderboard ID").
+					Value(&leaderboardId),
+				huh.NewInput().
+					Title("Leaderboard Code").
+					Value(&leaderboardCode),
+			).Title("Advent of Code"),
+		).WithTheme(huh.ThemeCatppuccin()).Run()
+		checkError(err, "Error getting test data")
 
 		guild := &database.Guild{
 			GuildID:         guildId,
@@ -42,9 +63,4 @@ var testdataCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(testdataCmd)
-
-	testdataCmd.Flags().String("guild-id", "", "guild ID to add to the database")
-	testdataCmd.Flags().String("leaderboard-code", "", "leaderboard code to add to the database")
-	testdataCmd.Flags().String("leaderboard-id", "", "leaderboard ID to add to the database")
-	testdataCmd.Flags().String("channel-id", "", "channel ID to add to the database")
 }

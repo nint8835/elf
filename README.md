@@ -2,7 +2,7 @@
 advent of code discord intergration
 
 ## Running
-1. Ensure you have [Go 1.21 or newer](https://golang.org/doc/install) installed
+1. Ensure you have [Go 1.23 or newer](https://golang.org/doc/install) installed
 2. Run `go mod download`
 3. Copy `.env.dist` to `.env` and populate it's contents
    - `ELF_DISCORD_TOKEN`: Discord token for the bot user to run as
@@ -22,5 +22,5 @@ If you are developing (or if the onboarding process still doesn't exist as of yo
 Example:
 
 ```sh
-go run . testdata --channel-id 909857762064871444 --guild-id 514110851016556567 --leaderboard-code 1111111-11111111 --leaderboard-id 0000001
+go run . testdata
 ```

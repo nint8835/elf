@@ -27,9 +27,9 @@ type Config struct {
 	AdventOfCodeSession string `required:"true" split_words:"true"`
 
 	// AdventOfCodeEvent is the event to fetch details from.
-	AdventOfCodeEvent string `default:"2024" split_words:"true"`
+	AdventOfCodeEvent string `default:"2025" split_words:"true"`
 	// UpdateSchedule is a cron schedule expression (in UTC) denoting when to update leaderboards
-	UpdateSchedule string `default:"30 1,15 1-25 Dec *" split_words:"true"`
+	UpdateSchedule string `default:"30 1,15 1-12 Dec *" split_words:"true"`
 
 	// ApiBindAddr is the address the leaderboard API should listen on.
 	ApiBindAddr string `default:":10000" split_words:"true"`
